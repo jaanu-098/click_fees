@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Register - FeeMaster</title>
+  <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+  <style>
+    body { background: #f8f9fa; }
+    .register-container { max-width: 400px; margin: 40px auto; }
+  </style>
+</head>
+<body>
+  <div class="register-container bg-white p-4 rounded shadow">
+    <h3 class="mb-4 text-center">Register</h3>
+    <form id="registerForm" action="register.php" method="post" novalidate>
+      <div class="mb-3">
+        <label for="name" class="form-label">Full Name</label>
+        <input type="text" class="form-control" id="name" name="name" required minlength="3">
+        <div class="invalid-feedback">Please enter your full name (min 3 characters).</div>
+      </div>
+      <div class="mb-3">
+        <label for="email" class="form-label">Email address</label>
+        <input type="email" class="form-control" id="email" name="email" required>
+        <div class="invalid-feedback">Please enter a valid email address.</div>
+      </div>
+      <div class="mb-3">
+        <label for="password" class="form-label">Password</label>
+        <input type="password" class="form-control" id="password" name="password" required minlength="6">
+        <div class="invalid-feedback">Password must be at least 6 characters.</div>
+      </div>
+      <div class="mb-3">
+        <label for="confirm_password" class="form-label">Confirm Password</label>
+        <input type="password" class="form-control" id="confirm_password" name="confirm_password" required minlength="6">
+        <div class="invalid-feedback">Passwords do not match.</div>
+      </div>
+      <div class="mb-3">
+        <label for="captcha" class="form-label">Captcha</label>
+        <div class="input-group">
+          <span class="input-group-text" id="captchaText"></span>
+          <input type="text" class="form-control" id="captchaInput" name="captcha" required>
+          <button class="btn btn-outline-secondary" type="button" id="refreshCaptcha">
+            <i class="bi bi-arrow-clockwise"></i>
+          </button>
+        </div>
+        <div class="invalid-feedback d-block" id="captchaError" style="display:none;">Please complete the captcha.</div>
+      </div>
+      <button type="submit" class="btn btn-primary w-100">Register</button>
+    </form>
+  </div>
+  <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // Generate random captcha
+    function generateCaptcha(length = 6) {
+      const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+      let captcha = '';
+      for (let i = 0; i < length; i++) {
+        captcha += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+      return captcha;
+    }
+
+    let currentCaptcha = '';
+
+    function setCaptcha() {
+      currentCaptcha = generateCaptcha();
+      document.getElementById('captchaText').textContent = currentCaptcha;
+      document.getElementById('captchaInput').value = '';
+      document.getElementById('captchaError').style.display = 'none';
+      document.getElementById('captchaInput').classList.remove('is-invalid');
+    }
+
+    document.getElementById('refreshCaptcha').onclick = setCaptcha;
+    window.onload = setCaptcha;
+
+    // Bootstrap validation
+    const form = document.getElementById('registerForm');
+    form.addEventListener('submit', function(event) {
+      let valid = true;
+      // Password match check
+      const pwd = document.getElementById('password');
+      const cpwd = document.getElementById('confirm_password');
+      if (pwd.value !== cpwd.value) {
+        cpwd.classList.add('is-invalid');
+        valid = false;
+      } else {
+        cpwd.classList.remove('is-invalid');
+      }
+      // Captcha check
+      const captchaInput = document.getElementById('captchaInput');
+      if (captchaInput.value.trim().toUpperCase() !== currentCaptcha) {
+        document.getElementById('captchaError').style.display = 'block';
+        captchaInput.classList.add('is-invalid');
+        valid = false;
+      } else {
+        document.getElementById('captchaError').style.display = 'none';
+        captchaInput.classList.remove('is-invalid');
+      }
+      // Bootstrap validation
+      if (!form.checkValidity() || !valid) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+      form.classList.add('was-validated');
+    });
+  </script>
+</body>
+</html>
